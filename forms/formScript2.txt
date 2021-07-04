@@ -1,0 +1,174 @@
+function onOpen() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var createForm = [{name: "Create Form", functionName: "CreateFormfromSheet"}];
+  ss.addMenu("Sheet to form", createForm);
+}
+
+function CreateFormfromSheet() {
+// var sheets = SpreadsheetApp.getActiveSpreadsheet().getSheets();
+// for ( var k = 0 ; k<sheets.length ; k++) {
+// var sheet = sheets[k];
+ var sheet = SpreadsheetApp.getActiveSpreadsheet();  
+ 
+ var range = sheet.getDataRange(); 
+ var data = range.getValues();
+ var numberRows = range.getNumRows();
+ var numberColumns = range.getNumColumns();
+ var firstRow = 1;
+ 
+ var form = FormApp.create(data[0][1]);
+ form.setDescription(data[1][1]);
+ form.requiresLogin(); 
+// form.setLimitOneResponsePerUser(true);
+// form.setCollectEmail(true);
+// form.setRequireLogin(true);  
+// form.hasRespondAgainLink(false);
+// form.setShuffleQuestions(true);  
+  
+ for(var i=0;i<numberRows;i++){
+  var questionType = data[i][0]; 
+  if (questionType==''){
+     continue;
+  }  
+  else if(questionType=='TEXT'){
+   form.addTextItem()
+     .setTitle(data[i][1])
+     .setHelpText(data[i][2])
+     .setRequired(true);   
+  } 
+  else if(questionType=='PARAGRAPH'){
+   form.addParagraphTextItem()
+     .setTitle(data[i][1])
+     .setHelpText(data[i][2])
+     .setRequired(true);
+  }
+   else if(questionType=='SCALE'){
+   form.addScaleItem()
+     .setBounds(data[i][3],data[i][4])
+     .setLabels(data[i][5],data[i][6])
+     .setTitle(data[i][1])
+     .setHelpText(data[i][2])
+     .setRequired(true);
+  }
+  else if(questionType=='CHOICE'){
+  var currentRow = firstRow+i;
+  var getSheetRange = sheet.getDataRange().getLastColumn();
+  var range_string = 'D' + currentRow + ":" + getSheetRange + currentRow;
+  var optionsArray = sheet.getRange(range_string).getValues();  
+  var choicesForQuestion =[];
+    for (var j=0;j<optionsArray[0].length;j++){
+      if (optionsArray[0][j] !== "") {
+        choicesForQuestion.push(optionsArray[0][j]);
+        }
+      }
+  form.addMultipleChoiceItem()
+    .setTitle(data[i][1])
+    .setHelpText(data[i][2])
+    .setChoiceValues(choicesForQuestion)
+    .setRequired(true); 
+  }
+  else if(questionType=='CHECKBOX'){
+  var currentRow = firstRow+i;
+  var getSheetRange = sheet.getDataRange().getLastColumn();
+  var range_string = 'D' + currentRow + ":" + getSheetRange + currentRow;
+  var optionsArray = sheet.getRange(range_string).getValues();  
+  var choicesForQuestion =[];
+    for (var j=0;j<optionsArray[0].length;j++){
+      if (optionsArray[0][j] !== "") {
+        choicesForQuestion.push(optionsArray[0][j]);
+        }
+      }
+  form.addCheckboxItem()
+    .setTitle(data[i][1])
+    .setHelpText(data[i][2])
+    .setChoiceValues(choicesForQuestion)
+    .setRequired(true);
+  }
+  else if(questionType=='LIST'){
+  var currentRow = firstRow+i;
+  var getSheetRange = sheet.getDataRange().getLastColumn();
+  var range_string = 'D' + currentRow + ":" + getSheetRange + currentRow;
+  var optionsArray = sheet.getRange(range_string).getValues();  
+  var choicesForQuestion =[];
+    for (var j=0;j<optionsArray[0].length;j++){
+      if (optionsArray[0][j] !== "") {
+        choicesForQuestion.push(optionsArray[0][j]);
+        }
+      }
+  form.addListItem()
+    .setTitle(data[i][1])
+    .setHelpText(data[i][2])
+    .setChoiceValues(choicesForQuestion)
+    .setRequired(true);
+  }
+  else if(questionType=='GRID'){
+  var currentRow = firstRow+i;
+  var getSheetRange = sheet.getDataRange().getLastColumn();
+  var range_string = 'D' + currentRow + ":" + getSheetRange + currentRow;
+  var optionsArray = sheet.getRange(range_string).getValues(); 
+  var rowTitles =[];
+   for (var j=0;j<optionsArray[0].length;j++){
+      if (optionsArray[0][j] !== "") {
+        rowTitles.push(optionsArray[0][j]);
+        }
+      }
+  var currentRow = firstRow+i+1;
+  var getSheetRange = sheet.getDataRange().getLastColumn();
+  var range_string = 'D' + currentRow + ":" + getSheetRange + currentRow;
+  var optionsArray = sheet.getRange(range_string).getValues(); 
+  var columnTitles =[];
+    for (var j=0;j<optionsArray[0].length;j++){
+      if (optionsArray[0][j] !== "") {
+        columnTitles.push(optionsArray[0][j]);
+        }
+      }
+  form.addGridItem()
+    .setTitle(data[i][1]) 
+    .setHelpText(data[i][2])
+    .setRows(rowTitles)
+    .setColumns(columnTitles)
+    .setRequired(true);
+  }       
+  else if(questionType=='PAGE'){
+   form.addPageBreakItem()
+     .setTitle(data[i][1]) 
+     .setHelpText(data[i][2]);   
+  } 
+  else if(questionType=='SECTION'){
+   form.addSectionHeaderItem()
+     .setTitle(data[i][1]) 
+     .setHelpText(data[i][2]);   
+  } 
+  else if(questionType=='IMAGE'){
+   var img = UrlFetchApp.fetch(data[i][3]); 
+   form.addImageItem()
+     .setTitle(data[i][1]) 
+     .setHelpText(data[i][2])
+     .setImage(img).setAlignment(FormApp.Alignment.CENTER).setWidth(800);
+  }
+  else if(questionType=='VIDEO'){
+   form.addVideoItem()
+     .setTitle(data[i][1]) 
+     .setHelpText(data[i][2])
+     .setVideoUrl(data[i][3]).setAlignment(FormApp.Alignment.CENTER).setWidth(800);
+  }
+  else if(questionType=='TIME'){
+   form.addTimeItem()
+     .setTitle(data[i][1]) 
+     .setHelpText(data[i][2]);   
+  }
+  else if(questionType=='ACCEPTANCE'){
+  var item = form.addMultipleChoiceItem();
+  var goSubmit = item.createChoice('YES', FormApp.PageNavigationType.SUBMIT);
+  var goRestart = item.createChoice('NO', FormApp.PageNavigationType.RESTART);     
+    item.setRequired(true);
+    item.setTitle(data[i][1]);
+    item.setHelpText(data[i][2]);
+    item.setChoices([goSubmit,goRestart]);   
+  }   
+  else{
+    continue;
+  }
+ }
+}
+// }
