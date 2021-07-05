@@ -1,0 +1,67 @@
+function myFunction() {
+  // create an array of images from a google drive folder
+  // you'll need the id of the folder
+  var imageFolderId = "1ufxmXJAoqTB1-8-SG_1BU3kYqnH5QpRi";
+  var imageFolder = DriveApp.getFolderById(imageFolderId);
+  var imageFiles = imageFolder.getFiles();
+  var imageArray = [];
+  while (imageFiles.hasNext()) {
+  var image = imageFiles.next();
+  imageArray.push(image);
+  }
+
+  // when creating your form, use the imageArray created in the previous step
+  // you'll index the imageArray with a random number from 0 to the number of images - 1
+  var form = FormApp.getActiveForm();
+  var randomImageIndex = Math.floor(Math.random() * imageArray.length);
+  var img = imageArray[randomImageIndex]
+
+  // Update form properties via chaining.
+  form.setTitle('SarcasmDet Audit Form')
+    .setDescription('In this form, you have to classify the meme picture as either sarcastic, humorous, offense or not meme!')
+    .setConfirmationMessage('Thanks for classifing!')
+    .setAllowResponseEdits(true)
+    .setAcceptingResponses(false);
+ //adding question fields (addImageItem(), addMultipleChoiceItem(), addCheckboxItem(), addGridItem())
+ //adding the image
+  form.addImageItem()
+    .setTitle('img 1')
+    .setHelpText('Classify Image To Continue') // The help text is the image description
+    .setImage(img);
+ //question1
+  var item = form.addMultipleChoiceItem();
+    item.setTitle('Image Classified as:')
+    .setChoices([
+      item.createChoice('Meme'),
+      item.createChoice('Not Meme'),
+      item.createChoice('I Dont Know')
+     ])
+    .showOtherOption(false);
+ //question2
+  var item2 = form.addCheckboxItem();
+    item2.setTitle('Type of Meme:')
+    .setChoices([
+      item2.createChoice('Humor'),
+      item2.createChoice('Offensive'),
+      item2.createChoice('Sarcastic')
+     ])
+    .showOtherOption(false);
+ //question3
+  var item3 = form.addCheckboxItem();
+    item3.setTitle('Category of Meme:')
+    .setChoices([
+      item3.createChoice('Racism'),
+      item3.createChoice('Vulnerable People'),
+      item3.createChoice('Religion'),
+      item3.createChoice('Nationality'),
+      item3.createChoice('Political'),
+      item3.createChoice('Funny'),
+      item3.createChoice('Celebrities')
+     ])
+    .showOtherOption(true);
+ //question4
+  var item4 = form.addGridItem();
+      item4.setTitle('How Likely Are You Rate Image As (Humor, Offense or Sarcastic)? (0 Lowest, 3 Highest)')
+           .setRows(['Humor', 'Offense', 'Sarcastic'])
+           .setColumns(['0', '1', '2', '3']);
+}
